@@ -4,30 +4,58 @@
 
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 export default function App() {
   const containerRef = useRef(null);
+  const [instance, setInstance] = useState(null);
 
   useEffect(() => {
-    const container = containerRef.current;
+    (async () => {
+      const container = containerRef.current;
 
-    const { NutrientViewer } = window;
-    if (container && NutrientViewer) {
-      NutrientViewer.load({
-        container,
-        document: "/example.pdf",
-      });
-    }
+      const { NutrientViewer } = window;
+      if (container && NutrientViewer) {
+        const instance = await NutrientViewer.load({
+          container,
+          document: "/example.pdf",
+        });
+        setInstance(instance);
+      }
 
-    return () => {
-      NutrientViewer?.unload(container);
-    };
+      return () => {
+        NutrientViewer?.unload(container);
+      };
+    })();
   }, []);
+
+  const setDate = () => {
+    if (!instance) return;
+
+    instance.setFormFieldValues({
+      date_field: "2025/07/20",
+    });
+  };
 
   return (
     <>
       <div ref={containerRef} style={{ height: "100vh" }} />
+      <button
+        style={{
+          position: "absolute",
+          top: "100px",
+          left: "100px",
+          zIndex: 1000,
+          border: "1px solid black",
+          cursor: "pointer",
+          padding: "10px",
+          backgroundColor: "white",
+        }}
+        onClick={setDate}
+        disabled={!instance}
+      >
+        set Date to 2025/07/20
+      </button>
       <style global jsx>
         {`
           * {
